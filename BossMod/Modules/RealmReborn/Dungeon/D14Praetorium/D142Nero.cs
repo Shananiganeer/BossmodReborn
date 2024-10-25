@@ -36,6 +36,20 @@ class AugmentedSuffering(BossModule module) : Components.KnockbackFromCastTarget
 class AugmentedShatter(BossModule module) : Components.StackWithCastTargets(module, ActionID.MakeSpell(AID.AugmentedShatter), 6, 4, 4);
 class AugmentedUprising(BossModule module) : Components.SelfTargetedAOEs(module, ActionID.MakeSpell(AID.AugmentedUprising), new AOEShapeCone(45, 45.Degrees()));
 class WheelOfSuffering(BossModule module) : Components.SelfTargetedAOEs(module, ActionID.MakeSpell(AID.WheelOfSuffering), new AOEShapeCircle(7));
+class ElectricField : Components.GenericAOEs
+{
+    private readonly AOEShapeDonut _electricity;
+
+    public ElectricField(BossModule module) : base(module)
+    {
+        _electricity = new AOEShapeDonut(Module.Bounds.Radius - 10, Module.Bounds.Radius);
+    }
+
+    public override IEnumerable<AOEInstance> ActiveAOEs(int slot, Actor actor)
+    {
+        yield return new(_electricity, Module.Center);
+    }
+}
 
 class D142NeroStates : StateMachineBuilder
 {
@@ -47,12 +61,13 @@ class D142NeroStates : StateMachineBuilder
             .ActivateOnEnter<AugmentedSuffering>()
             .ActivateOnEnter<AugmentedShatter>()
             .ActivateOnEnter<AugmentedUprising>()
-            .ActivateOnEnter<WheelOfSuffering>();
+            .ActivateOnEnter<WheelOfSuffering>()
+            .ActivateOnEnter<ElectricField>();
     }
 }
 
 [ModuleInfo(BossModuleInfo.Maturity.Verified, Contributors = "veyn", GroupType = BossModuleInfo.GroupType.CFC, GroupID = 16, NameID = 2135)]
-public class D142Nero(WorldState ws, Actor primary) : BossModule(ws, primary, new(-164, 0), new ArenaBoundsCircle(20))
+public class D142Nero(WorldState ws, Actor primary) : BossModule(ws, primary, new(-164, 0), new ArenaBoundsCircle(30))
 {
     protected override void CalculateModuleAIHints(int slot, Actor actor, PartyRolesConfig.Assignment assignment, AIHints hints)
     {
